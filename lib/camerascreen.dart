@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'dart:io';
 
 class CameraScreen extends StatefulWidget {
   final CameraDescription camera;
@@ -68,25 +69,46 @@ class _CameraScreenState extends State<CameraScreen> {
     );
   }
 
-
-
   void _captureImage() async {
     try {
-      await _initializeControllerFuture;
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => LoadingScreen()),
+      // );
 
-      // Attempt to take a picture and get the file path
       final image = await _controller.takePicture();
 
-      // Do something with the captured image (e.g., save it, display preview, etc.)
-      // Here, you can navigate to another screen to show the captured image preview.
-      // For simplicity, let's just display a SnackBar with the image path.
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Image saved at: ${image.path}'),
-        ),
+      // Navigate to the preview screen with the captured image
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ImagePreviewScreen(imagePath: image.path)),
       );
     } catch (e) {
       print('Error capturing image: $e');
     }
   }
 }
+
+class ImagePreviewScreen extends StatelessWidget {
+  final String imagePath;
+
+  ImagePreviewScreen({required this.imagePath});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Image Preview'),
+      ),
+      body: Center(
+        child: Image.file(
+          File(imagePath),
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
+  }
+}
+
