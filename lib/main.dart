@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:recipeai_app/splashscreen.dart';
+import './splashscreen.dart';
+
 
 void main() {
   runApp(const MyApp());

@@ -1,5 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:recipeai_app/camerascreen.dart';
 import 'package:video_player/video_player.dart';
+import 'package:camera/camera.dart';
+
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -30,18 +35,26 @@ class _SplashScreenState extends State<SplashScreen> {
   void _playVideo() async {
     // playing video
     _controller.play();
-
-    //add delay till video is complete
-    // await Future.delayed(const Duration(seconds: 4));
-
-    // navigating to home screen
-    Navigator.pushNamed(context, '/');
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  File? imageFile;
+
+  _openCamera(BuildContext context) async {
+    List<CameraDescription> cameras = await availableCameras();
+    CameraDescription camera = cameras.first;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CameraScreen(camera: camera),
+      ),
+    );
   }
 
   @override
@@ -56,9 +69,9 @@ class _SplashScreenState extends State<SplashScreen> {
               color: Colors.white,
               child: _controller.value.isInitialized
                   ? AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: VideoPlayer(_controller),
-              )
+                      aspectRatio: _controller.value.aspectRatio,
+                      child: VideoPlayer(_controller),
+                    )
                   : Container(),
             ),
             Container(
@@ -67,12 +80,16 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             TextButton(
               onPressed: () {
-                // Handle the scan button press here
-                // For example, you can navigate to another screen or perform some action
-                print('Berhasil ditekan!');
+                _openCamera(context);
               },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFF0C8B19),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(100),
+                ), // Set the button background color
+              ),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Text(
                   'Scan',
                   style: TextStyle(
@@ -81,12 +98,6 @@ class _SplashScreenState extends State<SplashScreen> {
                     fontSize: 24,
                   ),
                 ),
-              ),
-              style: TextButton.styleFrom(
-                backgroundColor: Color(0xFF0C8B19),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(100),
-                ), // Set the button background color
               ),
             ),
           ],
