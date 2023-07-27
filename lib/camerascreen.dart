@@ -1,9 +1,6 @@
+import 'package:RecipeAi/previewimage.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'dart:io';
-
-import 'package:recipeai_app/loadingscreen.dart';
-import 'package:recipeai_app/previewimage.dart';
 
 class CameraScreen extends StatefulWidget {
   final CameraDescription camera;
