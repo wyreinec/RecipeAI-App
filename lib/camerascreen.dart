@@ -3,6 +3,7 @@ import 'package:camera/camera.dart';
 import 'dart:io';
 
 import 'package:recipeai_app/loadingscreen.dart';
+import 'package:recipeai_app/previewimage.dart';
 
 class CameraScreen extends StatefulWidget {
   final CameraDescription camera;
@@ -73,44 +74,21 @@ class _CameraScreenState extends State<CameraScreen> {
 
   void _captureImage() async {
     try {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => LoadingScreen()),
-      );
-
-      final image = await _controller.takePicture();
-
-      // Navigate to the preview screen with the captured image
       // Navigator.push(
       //   context,
-      //   MaterialPageRoute(builder: (context) => ImagePreviewScreen(imagePath: image.path)),
+      //   MaterialPageRoute(builder: (context) => LoadingScreen()),
       // );
+
+      final XFile? image = await _controller.takePicture();
+
+      // Navigate to the preview screen with the captured image
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ImagePreviewScreen(imagePath: image!.path)),
+      );
     } catch (e) {
       print('Error capturing image: $e');
     }
-  }
-}
-
-class ImagePreviewScreen extends StatelessWidget {
-  final String imagePath;
-
-  ImagePreviewScreen({required this.imagePath});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Image Preview'),
-      ),
-      body: Center(
-        child: Image.file(
-          File(imagePath),
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          fit: BoxFit.contain,
-        ),
-      ),
-    );
   }
 }
 

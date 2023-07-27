@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:recipeai_app/camerascreen.dart';
 import 'package:video_player/video_player.dart';
 import 'package:camera/camera.dart';
+import './previewimage.dart';
 
 
 class LoadingScreen extends StatefulWidget {
@@ -34,10 +35,20 @@ class _LoadingScreenState extends State<LoadingScreen> {
   bool _isVideoFinished = false;
   void _playVideo() async {
     // playing video
-    _controller.play();
+    await _controller.play();
     setState(() {
       _isVideoFinished = true;
     });
+
+    if (_isVideoFinished) {
+      var image;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ImagePreviewScreen(imagePath: image.path),
+        ),
+      );
+    }
   }
 
   @override
@@ -45,20 +56,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
     _controller.dispose();
     super.dispose();
   }
-
-  File? imageFile;
-
-  // _openCamera(BuildContext context) async {
-  //   List<CameraDescription> cameras = await availableCameras();
-  //   CameraDescription camera = cameras.first;
-  //
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (context) => CameraScreen(camera: camera),
-  //     ),
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {
