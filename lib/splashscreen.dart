@@ -83,7 +83,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             AnimatedOpacity(
               opacity: _isVideoFinished ? 1.0 : 0.0,
-              duration: Duration(milliseconds: 500),
+              duration: const Duration(milliseconds: 500),
               child: TextButton(
                 onPressed: () {
                   _openCamera(context);
@@ -94,7 +94,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     borderRadius: BorderRadius.circular(100),
                   ),
                 ),
-                child: Padding(
+                child: const Padding(
                   padding: EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 8.0),
                   child: Text(

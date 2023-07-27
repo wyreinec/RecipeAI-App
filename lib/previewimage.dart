@@ -1,15 +1,18 @@
 import 'dart:convert';
-import 'dart:typed_data';
+import 'package:RecipeAi/loadingscreen.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
 import 'dart:io';
+import 'dart:io';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:grouped_list/grouped_list.dart';
 
 class ImagePreviewScreen extends StatefulWidget {
   final String imagePath;
 
-  ImagePreviewScreen({required this.imagePath});
+  const ImagePreviewScreen({super.key, required this.imagePath});
 
   @override
   _ImagePreviewScreenState createState() => _ImagePreviewScreenState();
@@ -18,6 +21,8 @@ class ImagePreviewScreen extends StatefulWidget {
 class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
   List<Map<String, dynamic>> detectedObjects =
       []; // List to store the detected objects
+  List<String> selectedIngredients = [];
+  int maxIngredientsToShow = 10;
 
   @override
   void initState() {
@@ -29,16 +34,16 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
   void _detectObjects() async {
     File imageFile = File(widget.imagePath);
     final bytes = imageFile.readAsBytesSync();
-    final predictionKey1 = '8d5b544a6a214d5eb009fd3a3121fbfd';
-    final endpoint1 =
+    const predictionKey1 = '8d5b544a6a214d5eb009fd3a3121fbfd';
+    const endpoint1 =
         'https://southcentralus.api.cognitive.microsoft.com/customvision/v3.0/Prediction/f01c253f-5c8b-4e55-9da6-f04194f40103/detect/iterations/Recipe-AI-Ingredients-Set-A/image';
 
-    final predictionKey2 = '8d5b544a6a214d5eb009fd3a3121fbfd';
-    final endpoint2 =
+    const predictionKey2 = '8d5b544a6a214d5eb009fd3a3121fbfd';
+    const endpoint2 =
         'https://southcentralus.api.cognitive.microsoft.com/customvision/v3.0/Prediction/8074687b-d5b7-4a94-95a0-a72293cb3d35/detect/iterations/Recipe-AI-Ingredients-Set-B/image';
 
-    final predictionKey3 = 'b60cf8817b284872a3037e5bf20d9e72';
-    final endpoint3 =
+    const predictionKey3 = 'b60cf8817b284872a3037e5bf20d9e72';
+    const endpoint3 =
         'https://recipeaiingredients-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/7d012f6e-deed-4ed7-8c41-6ac9078d8ab5/detect/iterations/Recipe-AI-Ingredients-Set-C/image';
 
     List<Map<String, dynamic>> allPredictions = [];
@@ -58,7 +63,7 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
         await _callDetectionAPI(endpoint3, predictionKey3, bytes);
     allPredictions.addAll(predictions3);
 
-    Set<String> uniqueTagNames = Set();
+    Set<String> uniqueTagNames = {};
     List<Map<String, dynamic>> uniquePredictions = [];
     for (var prediction in allPredictions) {
       String tagName = prediction['tagName'];
@@ -68,35 +73,37 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
       }
     }
 
+    uniquePredictions.sort(
+        (a, b) => (a['tagName'] as String).compareTo(b['tagName'] as String));
     setState(() {
       detectedObjects = uniquePredictions;
     });
   }
 
   void _showRecommendations() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Recommendations'),
-          content: Text('Your recommendations will be shown here.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Close'),
-            ),
-          ],
+    if (selectedIngredients.length >= 1 && selectedIngredients.length <= 5) {
+      // After the delay, navigate to the loading screen
+      Future.delayed(Duration(seconds: 2), () {
+        Navigator.pop(context); // Close the loading dialog
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => LoadingScreen()),
         );
-      },
-    );
+      });
+    } else {
+      // Show a snackbar or alert to inform the user to select at least 5 ingredients
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Jumlah bahan yang dipilih tidak sesuai'),
+        ),
+      );
+    }
   }
 
   Future<List<Map<String, dynamic>>> _callDetectionAPI(
       String endpoint, String predictionKey, Uint8List imageBytes) async {
     final uri = Uri.parse(endpoint);
-    var request = new http.Request("POST", uri);
+    var request = http.Request("POST", uri);
 
     request.headers['Prediction-Key'] = predictionKey;
     request.headers['Content-Type'] = "application/octet-stream";
@@ -109,11 +116,24 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
       final data = jsonDecode(await response.stream.bytesToString());
       List<Map<String, dynamic>> predictions = [];
       if (data.containsKey('predictions')) {
-        predictions = List<Map<String, dynamic>>.from(data['predictions']);
+        predictions = List<Map<String, dynamic>>.from(data['predictions'])
+            .where((prediction) => (prediction['probability'] as double) > 0.1)
+            .toList();
       }
+      // Sort the predictions by confidence in descending order
+      predictions.sort((a, b) => (b['probability'] as double)
+          .compareTo(a['probability'] as double));
+
+      // Limit the number of ingredients shown to a maximum of 10
+      if (predictions.length > 10) {
+        predictions = predictions.sublist(0, 10);
+      }
+
       return predictions;
     } else {
-      print('Error in object detection API: ${response.statusCode}');
+      if (kDebugMode) {
+        print('Error in object detection API: ${response.statusCode}');
+      }
       return [];
     }
   }
@@ -121,65 +141,118 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text('Image Preview'),
-      //   backgroundColor: Color(0xFF0C8B19),
-      // ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Center(
-              child: CustomPaint(
-                painter: BoundingBoxPainter(
-                  predictions: detectedObjects,
-                  imageSize: Size(
-                    MediaQuery.of(context).size.width,
-                    MediaQuery.of(context).size.height,
-                  ),
-                ),
-                child: Image.file(
-                  File(widget.imagePath),
-                  fit: BoxFit.contain,
-                  alignment: Alignment.topCenter,
-                ),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            title: Text('Bahan Terdeteksi'),
+            expandedHeight: 200,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Image.file(
+                File(widget.imagePath),
+                fit: BoxFit.cover,
               ),
             ),
           ),
-          // Display the detected objects below the image
-          Expanded(
-            child: ListView.builder(
-              itemCount: detectedObjects.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(detectedObjects[index]['tagName']),
-                );
-              },
+          SliverStickyHeader(
+            header: Container(
+              color: Color(0xFFFFC700),
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                detectedObjects.isEmpty
+                    ? "Memuat..."
+                    : "Pilih maksimal 5 bahan yang relevan",
+                style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Nunito'),
+              ),
             ),
+            sliver: detectedObjects.isNotEmpty
+                ? SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 8.0,
+                      crossAxisSpacing: 8.0,
+                      childAspectRatio: 3.0,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        if (index >= maxIngredientsToShow) return null;
+
+                        final tagName = detectedObjects[index]['tagName'];
+                        final isSelected =
+                            selectedIngredients.contains(tagName);
+
+                        return ListTile(
+                          title: Text(
+                            tagName ?? "Unknown",
+                            style: TextStyle(fontFamily: 'Nunito'),
+                          ),
+                          leading: GreenCheckbox(
+                            value: isSelected,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                if (value == true) {
+                                  selectedIngredients.add(tagName);
+                                } else {
+                                  selectedIngredients.remove(tagName);
+                                }
+                              });
+                            },
+                          ),
+                        );
+                      },
+                      childCount: detectedObjects.length > maxIngredientsToShow
+                          ? maxIngredientsToShow
+                          : detectedObjects.length,
+                    ),
+                  )
+                : SliverToBoxAdapter(
+                    child: Center(
+                      child: Text(""),
+                    ),
+                  ),
           ),
         ],
       ),
-      floatingActionButton: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
-        child: ElevatedButton(
-          onPressed: () {
-            // Handle the recommendation button press
-            _showRecommendations();
-          },
-          child: Text(
-            'Berikan Rekomendasi!',
-            style: TextStyle(
-              fontFamily: 'Nunito',
-              color: Colors.white,
-              fontSize: 16,
+      floatingActionButton: Align(
+        alignment: Alignment.bottomCenter,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          child: ElevatedButton(
+            onPressed: _showRecommendations,
+            child: Text(
+              'Berikan Rekomendasi!',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                color: Colors.white,
+                fontSize: 16,
+              ),
             ),
-          ),
-          style: ElevatedButton.styleFrom(
-            primary: Color(0xFF0C8B19),
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 16),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF0C8B19),
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 16),
+            ),
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+}
+
+class GreenCheckbox extends StatelessWidget {
+  final bool value;
+  final ValueChanged<bool?> onChanged;
+
+  GreenCheckbox({required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Checkbox(
+      value: value,
+      onChanged: onChanged,
+      activeColor: Color(0xFF0C8B19), // Set the activeColor to green
     );
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'package:camera/camera.dart';
 import './previewimage.dart';
 
 
@@ -14,6 +13,7 @@ class LoadingScreen extends StatefulWidget {
 class _LoadingScreenState extends State<LoadingScreen> {
   // video controller
   late VideoPlayerController _controller;
+  String imagePath = '';
 
   @override
   void initState() {
@@ -37,16 +37,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
     setState(() {
       _isVideoFinished = true;
     });
-
-    if (_isVideoFinished) {
-      var image;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ImagePreviewScreen(imagePath: image.path),
-        ),
-      );
-    }
   }
 
   @override
