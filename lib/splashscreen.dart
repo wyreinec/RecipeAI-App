@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:recipeai_app/camerascreen.dart';
 import 'package:video_player/video_player.dart';
 import 'package:camera/camera.dart';
@@ -32,9 +31,13 @@ class _SplashScreenState extends State<SplashScreen> {
     _playVideo();
   }
 
+  bool _isVideoFinished = false;
   void _playVideo() async {
     // playing video
     _controller.play();
+    setState(() {
+      _isVideoFinished = true;
+    });
   }
 
   @override
@@ -69,33 +72,38 @@ class _SplashScreenState extends State<SplashScreen> {
               color: Colors.white,
               child: _controller.value.isInitialized
                   ? AspectRatio(
-                      aspectRatio: _controller.value.aspectRatio,
-                      child: VideoPlayer(_controller),
-                    )
+                aspectRatio: _controller.value.aspectRatio,
+                child: VideoPlayer(_controller),
+              )
                   : Container(),
             ),
             Container(
               height: 50,
               color: Colors.white,
             ),
-            TextButton(
-              onPressed: () {
-                _openCamera(context);
-              },
-              style: TextButton.styleFrom(
-                backgroundColor: const Color(0xFF0C8B19),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(100),
-                ), // Set the button background color
-              ),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Text(
-                  'Scan',
-                  style: TextStyle(
-                    fontFamily: 'Nunito',
-                    color: Colors.white,
-                    fontSize: 24,
+            AnimatedOpacity(
+              opacity: _isVideoFinished ? 1.0 : 0.0,
+              duration: Duration(milliseconds: 500),
+              child: TextButton(
+                onPressed: () {
+                  _openCamera(context);
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: const Color(0xFF0C8B19),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
+                  child: Text(
+                    'Scan',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      color: Colors.white,
+                      fontSize: 24,
+                    ),
                   ),
                 ),
               ),

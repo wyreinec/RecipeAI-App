@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'dart:io';
 
+import 'package:recipeai_app/loadingscreen.dart';
+
 class CameraScreen extends StatefulWidget {
   final CameraDescription camera;
 
@@ -71,18 +73,18 @@ class _CameraScreenState extends State<CameraScreen> {
 
   void _captureImage() async {
     try {
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => LoadingScreen()),
-      // );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => LoadingScreen()),
+      );
 
       final image = await _controller.takePicture();
 
       // Navigate to the preview screen with the captured image
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ImagePreviewScreen(imagePath: image.path)),
-      );
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => ImagePreviewScreen(imagePath: image.path)),
+      // );
     } catch (e) {
       print('Error capturing image: $e');
     }
