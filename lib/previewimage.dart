@@ -5,9 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'dart:io';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
-import 'package:grouped_list/grouped_list.dart';
 
 class ImagePreviewScreen extends StatefulWidget {
   final String imagePath;
@@ -80,14 +78,48 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
     });
   }
 
-  void _showRecommendations() {
+  Future<void> _showRecommendations() async {
     if (selectedIngredients.length >= 1 && selectedIngredients.length <= 5) {
       // After the delay, navigate to the loading screen
+      // Future.delayed(Duration(seconds: 2), () {
+      //   Navigator.pop(context); // Close the loading dialog
+      //   Navigator.push(
+      //     context,
+      //     MaterialPageRoute(builder: (context) => LoadingScreen(selectedIngredients: selectedIngredients)),
+      //   );
+      // });
+
+      final data = {
+        'bahan': selectedIngredients,
+      };
+      final apiUrl =
+          'https://cbd7-2001-448a-3041-1fdc-a9cf-9c65-ab64-81f1.ngrok-free.app/rekomendasi/string';
+      try {
+        // Send the HTTP POST request
+        final response = await http.post(
+          Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(data),
+        );
+        if (response.statusCode == 200) {
+          // If the request is successful, handle the response here
+          print('API Response: ${response.body}');
+          // You can parse the response JSON and use the data as needed
+          // For example, you can show the recommended recipes in the UI
+        } else {
+          // Handle error if the API request is not successful
+          print('API Error: ${response.statusCode}');
+        }
+      } catch (e) {
+        // Handle any exceptions that occur during the API request
+        print('API Error: $e');
+      }
       Future.delayed(Duration(seconds: 2), () {
-        Navigator.pop(context); // Close the loading dialog
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => LoadingScreen()),
+          MaterialPageRoute(
+            builder: (context) => LoadingScreen(selectedIngredients: selectedIngredients),
+          ),
         );
       });
     } else {
@@ -121,8 +153,8 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
             .toList();
       }
       // Sort the predictions by confidence in descending order
-      predictions.sort((a, b) => (b['probability'] as double)
-          .compareTo(a['probability'] as double));
+      predictions.sort((a, b) =>
+          (b['probability'] as double).compareTo(a['probability'] as double));
 
       // Limit the number of ingredients shown to a maximum of 10
       if (predictions.length > 10) {

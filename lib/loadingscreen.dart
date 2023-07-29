@@ -1,10 +1,15 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:RecipeAi/tampilresep.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import './previewimage.dart';
 
 
 class LoadingScreen extends StatefulWidget {
-  const LoadingScreen({Key? key}) : super(key: key);
+  final List<String> selectedIngredients;
+  const LoadingScreen({Key? key, required this.selectedIngredients})
+      : super(key: key);
 
   @override
   _LoadingScreenState createState() => _LoadingScreenState();
@@ -14,6 +19,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   // video controller
   late VideoPlayerController _controller;
   String imagePath = '';
+  List<Map<String, dynamic>> recommendedRecipes = [];
 
   @override
   void initState() {
@@ -34,9 +40,50 @@ class _LoadingScreenState extends State<LoadingScreen> {
   void _playVideo() async {
     // playing video
     await _controller.play();
+    _controller.addListener(() {
+      if (_controller.value.position >= _controller.value.duration) {
+        // Video has finished playing
+        _fetchRecommendedRecipes(); // Fetch recommended recipes from the API
+      }
+    });
     setState(() {
       _isVideoFinished = true;
     });
+  }
+
+  void _fetchRecommendedRecipes() async {
+    final apiUrl =
+        'https://cbd7-2001-448a-3041-1fdc-a9cf-9c65-ab64-81f1.ngrok-free.app/rekomendasi/string';
+    try {
+      final data = {
+        'bahan': widget.selectedIngredients,
+      };
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode == 200) {
+        List<dynamic> jsonResponse = jsonDecode(response.body);
+        setState(() {
+          recommendedRecipes = jsonResponse.cast<Map<String, dynamic>>();
+        });
+      } else {
+        print('API Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('API Error: $e');
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(
+          selectedIngredients: widget.selectedIngredients,
+          recommendedRecipes: recommendedRecipes,
+        ),
+      ),
+    );
   }
 
   @override
