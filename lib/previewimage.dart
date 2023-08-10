@@ -20,7 +20,7 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
   List<Map<String, dynamic>> detectedObjects =
       []; // List to store the detected objects
   List<String> selectedIngredients = [];
-  int maxIngredientsToShow = 10;
+  int maxIngredientsToShow = 20;
 
   @override
   void initState() {
@@ -32,34 +32,43 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
   void _detectObjects() async {
     File imageFile = File(widget.imagePath);
     final bytes = imageFile.readAsBytesSync();
-    const predictionKey1 = '8d5b544a6a214d5eb009fd3a3121fbfd';
-    const endpoint1 =
-        'https://southcentralus.api.cognitive.microsoft.com/customvision/v3.0/Prediction/f01c253f-5c8b-4e55-9da6-f04194f40103/detect/iterations/Recipe-AI-Ingredients-Set-A/image';
+    // const predictionKey1 = '8d5b544a6a214d5eb009fd3a3121fbfd';
+    // const endpoint1 =
+    //     'https://southcentralus.api.cognitive.microsoft.com/customvision/v3.0/Prediction/f01c253f-5c8b-4e55-9da6-f04194f40103/detect/iterations/Recipe-AI-Ingredients-Set-A/image';
+    //
+    // const predictionKey2 = '8d5b544a6a214d5eb009fd3a3121fbfd';
+    // const endpoint2 =
+    //     'https://southcentralus.api.cognitive.microsoft.com/customvision/v3.0/Prediction/8074687b-d5b7-4a94-95a0-a72293cb3d35/detect/iterations/Recipe-AI-Ingredients-Set-B/image';
+    //
+    // const predictionKey3 = 'b60cf8817b284872a3037e5bf20d9e72';
+    // const endpoint3 =
+    //     'https://recipeaiingredients-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/7d012f6e-deed-4ed7-8c41-6ac9078d8ab5/detect/iterations/Recipe-AI-Ingredients-Set-C/image';
 
-    const predictionKey2 = '8d5b544a6a214d5eb009fd3a3121fbfd';
-    const endpoint2 =
-        'https://southcentralus.api.cognitive.microsoft.com/customvision/v3.0/Prediction/8074687b-d5b7-4a94-95a0-a72293cb3d35/detect/iterations/Recipe-AI-Ingredients-Set-B/image';
+    const predictionKey4 = 'b60cf8817b284872a3037e5bf20d9e72';
+    const endpoint4 =
+        'https://recipeaiingredients-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/33c132a7-4328-49b8-b99a-cd31da84ae56/detect/iterations/Iteration2/image';
 
-    const predictionKey3 = 'b60cf8817b284872a3037e5bf20d9e72';
-    const endpoint3 =
-        'https://recipeaiingredients-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/7d012f6e-deed-4ed7-8c41-6ac9078d8ab5/detect/iterations/Recipe-AI-Ingredients-Set-C/image';
 
     List<Map<String, dynamic>> allPredictions = [];
 
     // Call the first endpoint
-    List<Map<String, dynamic>> predictions1 =
-        await _callDetectionAPI(endpoint1, predictionKey1, bytes);
-    allPredictions.addAll(predictions1);
+    // List<Map<String, dynamic>> predictions1 =
+    //     await _callDetectionAPI(endpoint1, predictionKey1, bytes);
+    // allPredictions.addAll(predictions1);
+    //
+    // // Call the second endpoint
+    // List<Map<String, dynamic>> predictions2 =
+    //     await _callDetectionAPI(endpoint2, predictionKey2, bytes);
+    // allPredictions.addAll(predictions2);
+    //
+    // // Call the third endpoint
+    // List<Map<String, dynamic>> predictions3 =
+    //     await _callDetectionAPI(endpoint3, predictionKey3, bytes);
+    // allPredictions.addAll(predictions3);
 
-    // Call the second endpoint
-    List<Map<String, dynamic>> predictions2 =
-        await _callDetectionAPI(endpoint2, predictionKey2, bytes);
-    allPredictions.addAll(predictions2);
-
-    // Call the third endpoint
-    List<Map<String, dynamic>> predictions3 =
-        await _callDetectionAPI(endpoint3, predictionKey3, bytes);
-    allPredictions.addAll(predictions3);
+    List<Map<String, dynamic>> predictions4 =
+    await _callDetectionAPI(endpoint4, predictionKey4, bytes);
+    allPredictions.addAll(predictions4);
 
     Set<String> uniqueTagNames = {};
     List<Map<String, dynamic>> uniquePredictions = [];
@@ -93,7 +102,7 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
         'bahan': selectedIngredients,
       };
       final apiUrl =
-          'https://cbd7-2001-448a-3041-1fdc-a9cf-9c65-ab64-81f1.ngrok-free.app/rekomendasi/string';
+          'https://a92e-2001-448a-3045-5576-88b6-a43e-fcb3-5186.ngrok-free.app/rekomendasi/string';
       try {
         // Send the HTTP POST request
         final response = await http.post(
@@ -249,26 +258,57 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
       ),
       floatingActionButton: Align(
         alignment: Alignment.bottomCenter,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
-          child: ElevatedButton(
-            onPressed: _showRecommendations,
-            child: Text(
-              'Berikan Rekomendasi!',
-              style: TextStyle(
-                fontFamily: 'Nunito',
-                color: Colors.white,
-                fontSize: 16,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(left: 30), // Add spacing on the left
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(30),
+                child: ElevatedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Maaf bahanmu belum terdeteksi di sistem kami"),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    'Tidak Ada Bahan',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 16),
+                  ),
+                ),
               ),
             ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFF0C8B19),
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: ElevatedButton(
+                onPressed: _showRecommendations,
+                child: Text(
+                  'Rekomendasi!',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF0C8B19),
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 16),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

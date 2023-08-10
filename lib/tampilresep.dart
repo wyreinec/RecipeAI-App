@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class TampilResep extends StatelessWidget {
   final String Nama_Resep;
-  final String Bahan_Bahan;
-  final String Cara_Membuat;
+  final List<String> Bahan_Bahan;
+  final List<String> Cara_Membuat;
   final String Jenis_Resep;
 
   TampilResep({
@@ -15,14 +13,105 @@ class TampilResep extends StatelessWidget {
     required this.Jenis_Resep,
   });
 
+  List<String> formatBahanBahan(String bahanBahan) {
+    List<String> ingredients = bahanBahan.split('--');
+    return ingredients.map((ingredient) => ingredient.trim()).where((
+        ingredient) => ingredient.isNotEmpty).toList();
+  }
+
+  Icon getJenisResepIcon(String jenisResep) {
+    switch (jenisResep.toLowerCase()) {
+      case 'telur':
+        return Icon(
+          Icons.egg,
+          color: Colors.brown,
+          size: 18,
+        );
+      case 'tempe':
+        return Icon(
+          Icons.square_rounded,
+          color: Colors.white,
+          size: 18,
+        );
+      case 'tahu':
+        return Icon(
+          Icons.square_rounded,
+          color: Colors.yellow,
+          size: 18,
+        );
+      case 'udang':
+        return Icon(
+          Icons.fastfood,
+          color: Colors.orange,
+          size: 18,
+        );
+      case 'sayur':
+        return Icon(
+          Icons.local_florist,
+          color: Colors.green,
+          size: 18,
+        );
+    // Add more cases for other Jenis_Resep values and their corresponding Icons
+      default:
+        return Icon(
+          Icons.info,
+          color: Colors.grey,
+          size: 18,
+        );
+    }
+  }
+
+  void navigateToRecipeDetails(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          builder: (context, scrollController) {
+            return Container(
+              padding: EdgeInsets.all(16),
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      Nama_Resep,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Text('Jenis Resep: $Jenis_Resep'),
+                    SizedBox(height: 10),
+                    Text('Bahan-Bahan: $Bahan_Bahan'),
+                    SizedBox(height: 10),
+                    Text('Cara Membuat: $Cara_Membuat'),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 22, vertical: 10),
-      width: MediaQuery.of(context).size.width,
+      width: MediaQuery
+          .of(context)
+          .size
+          .width,
       height: 180,
       decoration: BoxDecoration(
-        color: Colors.white,
+        image: DecorationImage(
+          image: AssetImage("assets/background_card.jpg"),
+          fit: BoxFit.cover,
+        ),
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
@@ -45,6 +134,7 @@ class TampilResep extends StatelessWidget {
                 Nama_Resep,
                 style: TextStyle(
                   fontSize: 19,
+                  fontWeight: FontWeight.bold,
                 ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
@@ -66,20 +156,36 @@ class TampilResep extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.egg,
-                        color: Colors.brown,
-                        size: 18,
-                      ),
+                      getJenisResepIcon(Jenis_Resep),
                       SizedBox(width: 7),
                       Text(Jenis_Resep),
                     ],
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                  },
-                  child: Text('Lihat'),
+                Container(
+                  padding: EdgeInsets.all(5),
+                  margin: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Color(0xFF0C8B19),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: GestureDetector(
+                    onTap: () => navigateToRecipeDetails(context),
+                    child: Row(
+                      children: [
+                        SizedBox(width: 7),
+                        Text(
+                          'Lihat Resep',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -106,45 +212,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // List<Map<String, dynamic>> recommendedRecipes = [];
-  //
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   // Call the API to get recommended recipes when the screen is initialized
-  //   _fetchRecommendedRecipes();
-  // }
-  //
-  // void _fetchRecommendedRecipes() async {
-  //   final apiUrl = 'https://cbd7-2001-448a-3041-1fdc-a9cf-9c65-ab64-81f1.ngrok-free.app/rekomendasi/string'; // Replace with your actual API endpoint URL
-  //
-  //   try {
-  //     final data = {
-  //       'bahan': widget.selectedIngredients,
-  //     };
-  //
-  //     final response = await http.post(
-  //       Uri.parse(apiUrl),
-  //       headers: {'Content-Type': 'application/json'},
-  //       body: jsonEncode(data),
-  //     );
-  //
-  //     if (response.statusCode == 200) {
-  //       // If the request is successful, parse the response JSON
-  //       List<dynamic> jsonResponse = jsonDecode(response.body);
-  //       setState(() {
-  //         // Update the state with the recommended recipes
-  //         recommendedRecipes = jsonResponse.cast<Map<String, dynamic>>();
-  //       });
-  //     } else {
-  //       // Handle error if the API request is not successful
-  //       print('API Error: ${response.statusCode}');
-  //     }
-  //   } catch (e) {
-  //     // Handle any exceptions that occur during the API request
-  //     print('API Error: $e');
-  //   }
-  // }
+  bool _showRecipeDetails = false;
+  Map<String, dynamic>? _selectedRecipe;
 
   @override
   Widget build(BuildContext context) {
@@ -166,15 +235,29 @@ class _HomePageState extends State<HomePage> {
               itemCount: widget.recommendedRecipes.length,
               // Use the recommendedRecipes from the widget parameter
               itemBuilder: (context, index) {
-                final recipe = widget.recommendedRecipes[
-                    index]; // Use the recommendedRecipes from the widget parameter
+                final recipe = widget.recommendedRecipes[index];
+                final bahanBahan = recipe['Bahan-Bahan'];
+                final caraMembuat = recipe['Cara Membuat'];
+
+                // Handle type casting
+                List<String>? bahanBahanList;
+                if (bahanBahan is List<dynamic>) {
+                  bahanBahanList = bahanBahan.cast<String>();
+                }
+
+                List<String>? caraMembuatList;
+                if (caraMembuat is List<dynamic>) {
+                  caraMembuatList = caraMembuat.cast<String>();
+                }
+
                 return TampilResep(
                   Nama_Resep: recipe['Nama Resep'] ?? 'Unknown Recipe',
-                  Bahan_Bahan: recipe['Bahan-Bahan'] ?? '',
-                  Cara_Membuat: recipe['Cara Membuat'] ?? '',
+                  Bahan_Bahan: bahanBahanList ?? [],
+                  Cara_Membuat: caraMembuatList ?? [],
                   Jenis_Resep: recipe['Jenis Resep'] ?? '',
                 );
               },
+
             ),
           ),
         ],
