@@ -53,7 +53,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   void _fetchRecommendedRecipes() async {
     final apiUrl =
-        'https://a92e-2001-448a-3045-5576-88b6-a43e-fcb3-5186.ngrok-free.app/rekomendasi/string';
+        'https://adnan-pj.et.r.appspot.com/rekomendasi/string';
     try {
       final data = {
         'bahan': widget.selectedIngredients,

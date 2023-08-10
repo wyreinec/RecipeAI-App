@@ -102,7 +102,7 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
         'bahan': selectedIngredients,
       };
       final apiUrl =
-          'https://a92e-2001-448a-3045-5576-88b6-a43e-fcb3-5186.ngrok-free.app/rekomendasi/string';
+          'https://adnan-pj.et.r.appspot.com/rekomendasi/string';
       try {
         // Send the HTTP POST request
         final response = await http.post(
@@ -272,6 +272,7 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
                         content: Text("Maaf bahanmu belum terdeteksi di sistem kami"),
                       ),
                     );
+                    Navigator.pop(context);
                   },
                   child: Text(
                     'Tidak Ada Bahan',
