@@ -1,0 +1,158 @@
+@startuml
+set namespaceSeparator ::
+
+class "RecipeAi::camerascreen.dart::CameraScreen" {
+  +CameraDescription camera
+  +_CameraScreenState createState()
+}
+
+"RecipeAi::camerascreen.dart::CameraScreen" o-- "camera_platform_interface::src::types::camera_description.dart::CameraDescription"
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "RecipeAi::camerascreen.dart::CameraScreen"
+
+class "RecipeAi::camerascreen.dart::_CameraScreenState" {
+  -CameraController _controller
+  -dynamic _initializeControllerFuture
+  +void initState()
+  +void dispose()
+  +Widget build()
+  -void _captureImage()
+}
+
+"RecipeAi::camerascreen.dart::_CameraScreenState" o-- "camera::src::camera_controller.dart::CameraController"
+"flutter::src::widgets::framework.dart::State" <|-- "RecipeAi::camerascreen.dart::_CameraScreenState"
+
+class "RecipeAi::loadingscreen.dart::LoadingScreen" {
+  +List<String> selectedIngredients
+  +_LoadingScreenState createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "RecipeAi::loadingscreen.dart::LoadingScreen"
+
+class "RecipeAi::loadingscreen.dart::_LoadingScreenState" {
+  -VideoPlayerController _controller
+  +String imagePath
+  +List<Map<String, dynamic>> recommendedRecipes
+  -bool _isVideoFinished
+  +void initState()
+  -void _playVideo()
+  -void _fetchRecommendedRecipes()
+  +void dispose()
+  +Widget build()
+}
+
+"RecipeAi::loadingscreen.dart::_LoadingScreenState" o-- "video_player::video_player.dart::VideoPlayerController"
+"flutter::src::widgets::framework.dart::State" <|-- "RecipeAi::loadingscreen.dart::_LoadingScreenState"
+
+class "RecipeAi::main.dart::MyApp" {
+  +Widget build()
+}
+
+"flutter::src::widgets::framework.dart::StatelessWidget" <|-- "RecipeAi::main.dart::MyApp"
+
+class "RecipeAi::pasarterdekat.dart::NearGroceryRecommendationPage" {
+  +_NearGroceryRecommendationPageState createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "RecipeAi::pasarterdekat.dart::NearGroceryRecommendationPage"
+
+class "RecipeAi::pasarterdekat.dart::_NearGroceryRecommendationPageState" {
+  -Position? _userLocation
+  +void initState()
+  -dynamic _getUserLocation()
+  +Widget build()
+}
+
+"RecipeAi::pasarterdekat.dart::_NearGroceryRecommendationPageState" o-- "geolocator_platform_interface::src::models::position.dart::Position"
+"flutter::src::widgets::framework.dart::State" <|-- "RecipeAi::pasarterdekat.dart::_NearGroceryRecommendationPageState"
+
+class "RecipeAi::previewimage.dart::ImagePreviewScreen" {
+  +String imagePath
+  +_ImagePreviewScreenState createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "RecipeAi::previewimage.dart::ImagePreviewScreen"
+
+class "RecipeAi::previewimage.dart::_ImagePreviewScreenState" {
+  +List<Map<String, dynamic>> detectedObjects
+  +List<String> selectedIngredients
+  +int maxIngredientsToShow
+  +void initState()
+  -void _detectObjects()
+  -dynamic _showRecommendations()
+  -dynamic _callDetectionAPI()
+  +Widget build()
+}
+
+"flutter::src::widgets::framework.dart::State" <|-- "RecipeAi::previewimage.dart::_ImagePreviewScreenState"
+
+class "RecipeAi::previewimage.dart::GreenCheckbox" {
+  +bool value
+  +void Function(bool?) onChanged
+  +Widget build()
+}
+
+"RecipeAi::previewimage.dart::GreenCheckbox" o-- "flutter::src::foundation::basic_types.dart::void Function(bool)"
+"flutter::src::widgets::framework.dart::StatelessWidget" <|-- "RecipeAi::previewimage.dart::GreenCheckbox"
+
+class "RecipeAi::previewimage.dart::BoundingBoxPainter" {
+  +List<Map<String, dynamic>> predictions
+  +Size imageSize
+  +void paint()
+  +bool shouldRepaint()
+}
+
+"RecipeAi::previewimage.dart::BoundingBoxPainter" o-- "dart::ui::Size"
+"flutter::src::rendering::custom_paint.dart::CustomPainter" <|-- "RecipeAi::previewimage.dart::BoundingBoxPainter"
+
+class "RecipeAi::splashscreen.dart::SplashScreen" {
+  +_SplashScreenState createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "RecipeAi::splashscreen.dart::SplashScreen"
+
+class "RecipeAi::splashscreen.dart::_SplashScreenState" {
+  -VideoPlayerController _controller
+  -bool _isVideoFinished
+  +File? imageFile
+  +void initState()
+  -void _playVideo()
+  +void dispose()
+  -dynamic _openCamera()
+  +Widget build()
+}
+
+"RecipeAi::splashscreen.dart::_SplashScreenState" o-- "video_player::video_player.dart::VideoPlayerController"
+"RecipeAi::splashscreen.dart::_SplashScreenState" o-- "dart::io::File"
+"flutter::src::widgets::framework.dart::State" <|-- "RecipeAi::splashscreen.dart::_SplashScreenState"
+
+class "RecipeAi::tampilresep.dart::TampilResep" {
+  +String Nama_Resep
+  +List<String> Bahan_Bahan
+  +List<String> Cara_Membuat
+  +String Jenis_Resep
+  +List<String> formatBahanBahan()
+  +Icon getJenisResepIcon()
+  +void navigateToRecipeDetails()
+  +Widget build()
+}
+
+"flutter::src::widgets::framework.dart::StatelessWidget" <|-- "RecipeAi::tampilresep.dart::TampilResep"
+
+class "RecipeAi::tampilresep.dart::HomePage" {
+  +List<String> selectedIngredients
+  +List<Map<String, dynamic>> recommendedRecipes
+  +_HomePageState createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "RecipeAi::tampilresep.dart::HomePage"
+
+class "RecipeAi::tampilresep.dart::_HomePageState" {
+  -bool _showRecipeDetails
+  -Map<String, dynamic>? _selectedRecipe
+  +Widget build()
+}
+
+"flutter::src::widgets::framework.dart::State" <|-- "RecipeAi::tampilresep.dart::_HomePageState"
+
+
+@enduml

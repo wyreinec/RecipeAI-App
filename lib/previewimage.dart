@@ -46,7 +46,7 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
 
     const predictionKey4 = 'b60cf8817b284872a3037e5bf20d9e72';
     const endpoint4 =
-        'https://recipeaiingredients-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/33c132a7-4328-49b8-b99a-cd31da84ae56/detect/iterations/Iteration2/image';
+        'https://recipeaiingredients-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/33c132a7-4328-49b8-b99a-cd31da84ae56/detect/iterations/Recipe-AI-Ingredients/image';
 
 
     List<Map<String, dynamic>> allPredictions = [];
